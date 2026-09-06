@@ -1,0 +1,36 @@
+services:
+  server:
+    container_name: ${CONTAINER_NAME:-valheim-server}
+    stop_signal: SIGINT
+    image: valheim:latest
+    build:
+      context: ./image
+      args:
+        BRANCH: ${BRANCH:-public}
+    environment:
+      SERVER_NAME: ${SERVER_NAME:-myserver}
+      PASSWORD: ${PASSWORD:-password}
+      WORLD_NAME: ${WORLD_NAME:-myworld}
+      CROSSPLAY: ${CROSSPLAY:-true}
+      PUBLIC: ${PUBLIC:-true}
+      SAVEINTERVAL: ${SAVEINTERVAL:-1800}
+      BACKUPS: ${BACKUPS:-4}
+      BACKUPSHORT: ${BACKUPSHORT:-7200}
+      BACKUPLONG: ${BACKUPLONG:-43200}
+      INSTANCEID: ${INSTANCEID:-1}
+      PRESET: ${PRESET:-}
+      MODIFIERS: ${MODIFIERS:-}
+      SETKEYS: ${SETKEYS:-}
+    ports:
+      - "${SERVER_PORT:-2456}:2456/udp"
+      - "${SERVER_PORT:-2456}:2456/tcp"
+    volumes:
+      - "valheim-data:/root/.config/unity3d/IronGate/Valheim"
+    stdin_open: true
+    tty: true
+    stop_grace_period: 10s
+    restart: unless-stopped
+
+volumes:
+  valheim-data:
+    name: "valheim-data"

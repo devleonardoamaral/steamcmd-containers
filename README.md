@@ -1,57 +1,50 @@
 # Valheim Dedicated Server
 
-## Build
+Containerized setup for running a Valheim dedicated server using Podman, with persistent data and configurable settings.
 
-```sh
-podman build --tag valheim:latest --format docker .
+## Starting
+
+Copy the `.env.example` file and rename it to `.env`:
+
+```bash
+cp .env.example .env
 ```
 
-## Server configuration setup
+Then edit the values within this file according to your needs:
 
-1. Open `./config/start_server.sh` with a text editor.
-2. Edit server settings by editing the below line:
-
-```txt
-./valheim_server.x86_64 -name "My server" -port 2456 -world "Dedicated" -password "secret" -crossplay
+```bash
+nano .env
 ```
 
-Removing `-crossplay` will require container port mapping and router port forwarding.
+Start the server using the command below; the first run takes longer because the image is being built:
 
-## Create container
-
-Bind the persistent data folder to the expected path inside the container:
-
-```sh
-podman create -ti --name valheim-server \
-  --mount=type=bind,src=./data,dst=/root/.config/unity3d/IronGate/Valheim \
-  localhost/valheim:latest
+```bash
+podman-compose up -d --build
 ```
 
-`./data` will contain saves, logs, and configs.
+## Stopping Safely
 
-## Start / Stop
+```bash
+podman-compose down
+```
 
-```sh
-podman start valheim-server
-podman stop valheim-server
+## Updating
+
+Rebuild the image after modifying the `.env` file. The volume containing the server save is preserved:
+
+```bash
+podman-compose up -d --build --no-cache
 ```
 
 ## Logs
 
-```sh
-podman logs -f valheim-server
+```bash
+# All services
+podman-compose logs
+
+# Follow in real time
+podman-compose logs -f
+
+# Last 50 lines only
+podman-compose logs --tail 50
 ```
-
-## Updating the server
-
-```sh
-podman build --tag valheim:latest .
-podman stop valheim-server
-podman rm valheim-server
-# podman create ... (same command as above)
-podman start valheim-server
-```
-
-## Notes
-
-* Bind mounts are required to persist worlds and server configurations.
